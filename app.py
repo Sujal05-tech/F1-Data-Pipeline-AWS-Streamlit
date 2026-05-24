@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import boto3
-from streamlit_navigation_bar import st_navbar
 import plotly.graph_objects as go
 import plotly.express as px
 import io
