@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import boto3
+from streamlit_navigation_bar import st_navbar
 import plotly.graph_objects as go
 import plotly.express as px
 import io
@@ -220,6 +221,22 @@ div[data-testid="stRadio"] label {
     letter-spacing: 2px !important;
     color: rgba(255,255,255,0.6) !important;
 }
+div[data-testid="stButton"] button {
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 2px solid #333 !important;
+    color: rgba(255,255,255,0.5) !important;
+    font-family: 'Orbitron', sans-serif !important;
+    font-size: 0.65rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 3px !important;
+    border-radius: 0 !important;
+    width: 100% !important;
+}
+div[data-testid="stButton"] button:hover {
+    color: #e10600 !important;
+    border-bottom: 2px solid #e10600 !important;
+}
 </style>
 """
 st.markdown(css, unsafe_allow_html=True)
@@ -273,24 +290,25 @@ def apply_chart(fig, height=350, extra=None):
     fig.update_yaxes(gridcolor='rgba(255,255,255,0.05)', linecolor='rgba(255,255,255,0.1)')
     return fig
 
-# ── SIDEBAR ──────────────────────────────────────────────────────
-with st.sidebar:
-    st.markdown('<div class="sidebar-logo">F1</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sidebar-subtitle">Data Analysis 2024–25</div>', unsafe_allow_html=True)
+# ── NAVIGATION ───────────────────────────────────────────────────
+if 'page' not in st.session_state:
+    st.session_state.page = "Overview"
 
-    page = st.radio(
-        "",
-        ["🏠  Overview", "👤  Drivers", "🏆  Constructors", "🏁  Race Analysis", "🔍  Team Deep Dive"],
-        label_visibility="collapsed"
-    )
+cols = st.columns([0.5, 1, 1, 1, 1, 1])
+with cols[0]:
+    st.markdown('<div style="font-family:Orbitron;font-weight:900;font-size:1.5rem;color:#e10600;padding:0.5rem 0;">F1</div>', unsafe_allow_html=True)
+with cols[1]:
+    if st.button("OVERVIEW", use_container_width=True): st.session_state.page = "Overview"
+with cols[2]:
+    if st.button("DRIVERS", use_container_width=True): st.session_state.page = "Drivers"
+with cols[3]:
+    if st.button("CONSTRUCTORS", use_container_width=True): st.session_state.page = "Constructors"
+with cols[4]:
+    if st.button("RACES", use_container_width=True): st.session_state.page = "Race"
+with cols[5]:
+    if st.button("TEAMS", use_container_width=True): st.session_state.page = "Team"
 
-    st.markdown("<br><br>", unsafe_allow_html=True)
-    st.markdown(
-        '<div style="font-family:Rajdhani;font-size:0.7rem;color:rgba(255,255,255,0.2);'
-        'letter-spacing:2px;text-transform:uppercase;text-align:center;">'
-        'Live via AWS S3<br>Auto-updates daily</div>',
-        unsafe_allow_html=True
-    )
+page = st.session_state.page
 
 # ════════════════════════════════════════════════════════════════
 # PAGE: OVERVIEW
