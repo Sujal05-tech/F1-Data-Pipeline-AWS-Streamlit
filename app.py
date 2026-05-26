@@ -7,6 +7,8 @@ import io
 import base64
 from datetime import datetime
 
+from tempCodeRunnerFile import load_data
+
 # ── PAGE CONFIG ──────────────────────────────────────────────────
 st.set_page_config(
     page_title="F1 Data Analysis 2024-25",
@@ -242,24 +244,26 @@ st.markdown(css, unsafe_allow_html=True)
 
 # ── LOAD DATA ────────────────────────────────────────────────────
 @st.cache_data(ttl=3600)
-def load_data(filename):
+def load_all():
     s3 = boto3.client('s3', region_name='us-east-1')
     bucket = "f1-datapipeline-sujal"
-    response = s3.get_object(Bucket=bucket, Key=filename)
-    return pd.read_csv(io.StringIO(response['Body'].read().decode('utf-8')))
-
-@st.cache_data(ttl=3600)
-def load_all():
-    date = datetime.now().strftime('%Y%m%d')
+    
+    def get_latest_file(prefix):
+        response = s3.list_objects_v2(Bucket=bucket, Prefix=prefix)
+        files = response.get('Contents', [])
+        if not files:
+            raise Exception(f"No files found for {prefix}")
+        latest = sorted(files, key=lambda x: x['LastModified'], reverse=True)[0]
+        return latest['Key']
+    
     return {
-        'r24': load_data(f"f1-cleaned-data/cleaned_results_2024_{date}.csv"),
-        'r25': load_data(f"f1-cleaned-data/cleaned_results_2025_{date}.csv"),
-        'd24': load_data(f"f1-cleaned-data/cleaned_driver_standings_2024_{date}.csv"),
-        'd25': load_data(f"f1-cleaned-data/cleaned_driver_standings_2025_{date}.csv"),
-        'c24': load_data(f"f1-cleaned-data/cleaned_constructor_standings_2024_{date}.csv"),
-        'c25': load_data(f"f1-cleaned-data/cleaned_constructor_standings_2025_{date}.csv"),
+        'r24': load_data(get_latest_file("f1-cleaned-data/cleaned_results_2024")),
+        'r25': load_data(get_latest_file("f1-cleaned-data/cleaned_results_2025")),
+        'd24': load_data(get_latest_file("f1-cleaned-data/cleaned_driver_standings_2024")),
+        'd25': load_data(get_latest_file("f1-cleaned-data/cleaned_driver_standings_2025")),
+        'c24': load_data(get_latest_file("f1-cleaned-data/cleaned_constructor_standings_2024")),
+        'c25': load_data(get_latest_file("f1-cleaned-data/cleaned_constructor_standings_2025")),
     }
-
 try:
     data = load_all()
 
