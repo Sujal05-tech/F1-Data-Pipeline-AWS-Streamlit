@@ -7,7 +7,6 @@ import io
 import base64
 from datetime import datetime
 
-from tempCodeRunnerFile import load_data
 
 # ── PAGE CONFIG ──────────────────────────────────────────────────
 st.set_page_config(
