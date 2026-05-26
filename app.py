@@ -243,6 +243,11 @@ st.markdown(css, unsafe_allow_html=True)
 
 # ── LOAD DATA ────────────────────────────────────────────────────
 @st.cache_data(ttl=3600)
+def load_data(filename):
+    s3 = boto3.client('s3', region_name='us-east-1')
+    bucket = "f1-datapipeline-sujal"
+    response = s3.get_object(Bucket=bucket, Key=filename)
+    return pd.read_csv(io.StringIO(response['Body'].read().decode('utf-8')))
 def load_all():
     s3 = boto3.client('s3', region_name='us-east-1')
     bucket = "f1-datapipeline-sujal"
